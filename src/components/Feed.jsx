@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
 import Post from "./Post";
-import PostForm from "./postForm.jsx";
+import PostForm from "./postform.jsx";
 import ErrorBoundary from "./ErrorBoundary.jsx";
 
 function FeedContent() {
