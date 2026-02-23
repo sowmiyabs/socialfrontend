@@ -1,32 +1,57 @@
+// src/components/Feed.jsx
 import { useEffect, useState } from "react";
 import API from "../api/axios";
 import Post from "./Post";
+import PostForm from "./PostForm";
+import ErrorBoundary from "./ErrorBoundary.jsx";
 
-export default function Feed() {
+function FeedContent() {
   const [posts, setPosts] = useState([]);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const res = await API.get("/posts"); // <- your backend route
-        console.log("Fetched posts:", res.data); // DEBUG
-        setPosts(res.data);
-      } catch (err) {
-        console.error("Error fetching posts:", err);
+  // Fetch all posts with token
+  const fetchPosts = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.warn("No token found – user might not be logged in");
+        return;
       }
-    };
+
+      const res = await API.get("/posts", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setPosts(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Error fetching posts:", err);
+    }
+  };
+
+  useEffect(() => {
     fetchPosts();
   }, []);
 
-  if (!posts.length)
-    return <p className="text-center mt-10 text-gray-500">No posts yet!</p>;
+  // Add new post at the top
+  const handlePostCreated = (newPost) => {
+    setPosts((prev) => [newPost, ...prev]);
+  };
 
   return (
-    <div className="space-y-4 p-4 max-w-2xl mx-auto">
-      {posts.map((post) => (
-        <Post key={post._id} post={post} />
-      ))}
+    <div className="max-w-3xl mx-auto p-4">
+      <PostForm onPostCreated={handlePostCreated} />
+      {posts.length > 0 ? (
+        posts.map((post) => <Post key={post._id} post={post} />)
+      ) : (
+        <p className="text-center text-gray-500 mt-10">No posts yet!</p>
+      )}
     </div>
   );
 }
 
+export default function Feed() {
+  return (
+    <ErrorBoundary>
+      <FeedContent />
+    </ErrorBoundary>
+  );
+}

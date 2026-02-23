@@ -1,12 +1,16 @@
+// src/App.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useContext } from "react";
+
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Home from "./pages/Home";
 import Feed from "./components/Feed";
 import Profile from "./pages/Profile";
+import Friends from "./pages/Friends";
+import Notifications from "./pages/Notifications";
 import { AuthContext } from "./context/AuthContext";
+import ErrorBoundary from "./components/ErrorBoundary"; // ✅ default import
 
 function App() {
   const { user } = useContext(AuthContext);
@@ -14,13 +18,58 @@ function App() {
   return (
     <div className="bg-gray-100 min-h-screen">
       <Navbar />
+
       <div className="container mx-auto p-4">
         <Routes>
-          <Route path="/login" element={!user ? <Login /> : <Navigate to="/feed" />} />
-          <Route path="/register" element={!user ? <Register /> : <Navigate to="/feed" />} />
-          <Route path="/feed" element={user ? <Feed /> : <Navigate to="/login" />} />
-          <Route path="/profile/:id" element={user ? <Profile /> : <Navigate to="/login" />} />
-          <Route path="*" element={<Navigate to={user ? "/feed" : "/login"} />} />
+          {/* Public Routes */}
+          <Route
+            path="/login"
+            element={!user ? <Login /> : <Navigate to="/feed" />}
+          />
+          <Route
+            path="/register"
+            element={!user ? <Register /> : <Navigate to="/feed" />}
+          />
+
+          {/* Protected Routes */}
+          <Route
+            path="/feed"
+            element={user ? <Feed /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/profile/:id"
+            element={user ? <Profile /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/friends"
+            element={
+              user ? (
+                <ErrorBoundary>
+                  <Friends />
+                </ErrorBoundary>
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              user ? (
+                <ErrorBoundary>
+                  <Notifications />
+                </ErrorBoundary>
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+
+          {/* Catch-all */}
+          <Route
+            path="*"
+            element={<Navigate to={user ? "/feed" : "/login"} />}
+          />
         </Routes>
       </div>
     </div>
