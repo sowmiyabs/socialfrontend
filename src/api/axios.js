@@ -3,9 +3,10 @@ import axios from "axios";
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: { "Content-Type": "application/json" },
+  withCredentials: true, // ✅ allows cookies/headers for CORS
 });
 
-// Attach token automatically
+// Attach token automatically to every request
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
